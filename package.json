@@ -54,21 +54,9 @@
                 "type": "string",
                 "description": "Path to soldb-cli directory"
               },
-              "debugDapServer": {
-                "type": "boolean",
-                "description": "Enable debugging of the DAP server itself"
-              },
-              "debugPort": {
-                "type": "number",
-                "description": "Port for DAP server debugging"
-              },
               "source": {
                 "type": "string",
                 "description": "Source file path"
-              },
-              "workspaceRoot": {
-                "type": "string",
-                "description": "Workspace root directory"
               },
               "rpc": {
                 "type": "string",
