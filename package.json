@@ -1,0 +1,101 @@
+{
+  "name": "wn",
+  "displayName": "Soldb Debugger",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "activationEvents": [
+    "onLanguage:solidity",
+    "onDebug",
+    "onCommand:wn.soldb"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "wn.soldb",
+        "title": "Soldb Debugger"
+      }
+    ],
+    "debuggers": [
+      {
+        "type": "soldb",
+        "label": "Soldb",
+        "configurationAttributes": {
+          "launch": {
+            "properties": {
+              "contractAddress": {
+                "type": "string",
+                "description": "Contract address to debug"
+              },
+              "contracts": {
+                "type": "string",
+                "description": "Path to contracts mapping file (e.g., 'out/contracts.json')"
+              },
+              "ethdebugDir": {
+                "type": "string",
+                "description": "ETHDebug directory or address:name:path format"
+              },
+              "function": {
+                "type": "string",
+                "description": "Function signature to debug (e.g., 'increment()')"
+              },
+              "functionArgs": {
+                "type": "array",
+                "description": "Function arguments",
+                "default": []
+              },
+              "pythonPath": {
+                "type": "string",
+                "description": "Path to Python executable"
+              },
+              "soldbPath": {
+                "type": "string",
+                "description": "Path to soldb-cli directory"
+              },
+              "debugDapServer": {
+                "type": "boolean",
+                "description": "Enable debugging of the DAP server itself"
+              },
+              "debugPort": {
+                "type": "number",
+                "description": "Port for DAP server debugging"
+              },
+              "source": {
+                "type": "string",
+                "description": "Source file path"
+              },
+              "workspaceRoot": {
+                "type": "string",
+                "description": "Workspace root directory"
+              },
+              "rpc": {
+                "type": "string",
+                "description": "RPC URL",
+                "default": "http://localhost:8545"
+              },
+              "block": {
+                "type": "string",
+                "description": "Block number or 'latest'"
+              },
+              "from_addr": {
+                "type": "string",
+                "description": "From address for transaction simulation"
+              }
+            }
+          }
+        },
+        "initialConfigurations": [],
+        "configurationSnippets": []
+      }
+    ]
+  },
+  "scripts": {
+    "build": "tsc -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.0.0"
+  }
+}

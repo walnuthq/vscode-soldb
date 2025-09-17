@@ -1,0 +1,10 @@
+out/
+dist/
+*.vsix
+.vscode/
+.vscode-test.*
+eslint.config.mjs
+tsconfig.json
+node_modules/
+.vscodeignore
+src/test/
