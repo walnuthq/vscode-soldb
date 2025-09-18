@@ -1,59 +1,18 @@
 import * as vscode from 'vscode';
+import { SoldbDebugConfigurationProvider } from './configProvider';
+import { SoldbDebugAdapterDescriptorFactory } from './debugAdapter';
+import { SolidityCodeLensProvider } from './soliditySupport';
 
 export function activate(context: vscode.ExtensionContext) {
 
     // Register the soldb debug configuration provider
     context.subscriptions.push(
-        vscode.debug.registerDebugConfigurationProvider('soldb', {
-            resolveDebugConfiguration(folder, config) {
-                config.type = 'soldb';
-                config.request = config.request || 'launch';
-                
-                // Allow launch.json to override workspace settings
-                const workspaceConfig = vscode.workspace.getConfiguration('soldb');
-                config.pythonPath = config.pythonPath || workspaceConfig.get<string>('pythonPath') || 'python3';
-                config.soldbPath = config.soldbPath || workspaceConfig.get<string>('soldbPath') || '';
-                config.functionArgs = config.functionArgs || workspaceConfig.get<string[]>('functionArgs') || [];
-                config.source = vscode.window.activeTextEditor?.document.uri.fsPath || '';
-                return config;
-            }
-        })
+        vscode.debug.registerDebugConfigurationProvider('soldb', new SoldbDebugConfigurationProvider())
     );
     
     // Register the soldb debug adapter descriptor factory
     context.subscriptions.push(
-        vscode.debug.registerDebugAdapterDescriptorFactory('soldb', {
-            createDebugAdapterDescriptor(session) {                
-                // Get configuration settings (launch.json overrides workspace settings)
-                const workspaceConfig = vscode.workspace.getConfiguration('soldb');
-                const pythonPath = session.configuration.pythonPath || workspaceConfig.get<string>('pythonPath') || 'python3';
-                const soldbPath = session.configuration.soldbPath || workspaceConfig.get<string>('soldbPath') || '';
-            
-                // Require soldb path to be configured
-                if (!soldbPath) {
-                    throw new Error('soldb path not configured. Please set soldb.soldbPath in settings or launch.json.');
-                }
-                
-                // Set PYTHONPATH to the src directory so Python can find the soldb module
-                const srcPath = `${soldbPath}/src/soldb`;
-                
-                // Build command arguments - use module execution
-                const args = ['-m', 'soldb.dap_server'];
-                
-                const executable = new vscode.DebugAdapterExecutable(
-                    pythonPath,
-                    args,
-                    {
-                        cwd: soldbPath,
-                        env: {
-                            ...process.env,
-                            PYTHONPATH: srcPath
-                        }
-                    }
-                );
-                return executable;
-            }
-        })
+        vscode.debug.registerDebugAdapterDescriptorFactory('soldb', new SoldbDebugAdapterDescriptorFactory())
     );
 
     // Register CodeLens provider for Solidity
@@ -133,40 +92,4 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {}
-
-class SolidityCodeLensProvider implements vscode.CodeLensProvider {
-    onDidChangeCodeLenses?: vscode.Event<void>;
-
-    provideCodeLenses(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.CodeLens[] {
-        const codeLenses: vscode.CodeLens[] = [];
-            const regexFunc = /function\s+(\w+)\s*\(([^)]*)\)/g;
-
-            for (let i = 0; i < document.lineCount; i++) {
-                const line = document.lineAt(i);
-                const matchFunc = regexFunc.exec(line.text);
-                if (matchFunc) {
-                    const functionName = matchFunc[1];
-                    const params = matchFunc[2].trim();
-                    // Extract parameter types
-                    let types: string[] = [];
-                    if (params.length > 0) {
-                        types = params.split(',').map(param => {
-                            let type = param.trim().split(/\s+/)[0];
-                            return type;
-                        });
-                    }
-                    const signature = `${functionName}(${types.join(',')})`;
-                    const args_cnt = types.length;
-                    const range = new vscode.Range(i, 0, i, line.text.length);
-                    codeLenses.push(new vscode.CodeLens(range, {
-                        title: 'Debug',
-                        command: 'wn.runFunction',
-                        arguments: [signature, args_cnt]
-                    }));
-                }
-                regexFunc.lastIndex = 0; // Reset regex for next line
-            }
-            return codeLenses;
-    }
-}
 
