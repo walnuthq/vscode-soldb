@@ -46,6 +46,7 @@ export function activate(context: vscode.ExtensionContext) {
             let soldbPath = workspaceConfig.get<string>('soldbPath') || '';
             let pythonPath = workspaceConfig.get<string>('pythonPath') || 'python3';
             let contractsPath = workspaceConfig.get<string>('contracts') || 'contracts.json';
+            let from_addr = workspaceConfig.get<string>('from_addr') || "";
             
             // Check if there are any soldb debug configurations in launch.json
             const launchConfig = vscode.workspace.getConfiguration('launch');
@@ -56,6 +57,7 @@ export function activate(context: vscode.ExtensionContext) {
                 soldbPath = soldbConfig.soldbPath;
                 pythonPath = soldbConfig.pythonPath;
                 contractsPath = soldbConfig.contracts || contractsPath;
+                from_addr = soldbConfig.from_addr || "";
             }
             // If args were not provided via input box, try to get from launch.json or workspace settings
             if (args.length !== args_cnt) {
@@ -76,6 +78,7 @@ export function activate(context: vscode.ExtensionContext) {
                 functionArgs: args,
                 pythonPath: pythonPath,
                 contracts: contractsPath,
+                from_addr: from_addr,
                 source: vscode.window.activeTextEditor?.document.uri.fsPath || '',
                 workspaceRoot: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || ''
             };            

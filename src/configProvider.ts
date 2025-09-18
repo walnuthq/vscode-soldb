@@ -12,6 +12,7 @@ export class SoldbDebugConfigurationProvider implements vscode.DebugConfiguratio
                 function: '',
                 functionArgs: [],
                 contracts: 'contracts.json',
+                from_addr: '',
                 source: '${file}',
                 workspaceRoot: '${workspaceFolder}'
             }
@@ -33,6 +34,7 @@ export class SoldbDebugConfigurationProvider implements vscode.DebugConfiguratio
         config.soldbPath = config.soldbPath || workspaceConfig.get<string>('soldbPath') || '';
         config.functionArgs = config.functionArgs || workspaceConfig.get<string[]>('functionArgs') || [];
         config.contracts = config.contracts || workspaceConfig.get<string>('contracts') || 'contracts.json';
+        config.from_addr = config.from_addr || workspaceConfig.get<string>('from_addr') || "";
         config.source = config.source || vscode.window.activeTextEditor?.document.uri.fsPath || '';
         config.workspaceRoot = config.workspaceRoot || folder?.uri.fsPath || '';
 
