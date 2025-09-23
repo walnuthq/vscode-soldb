@@ -45,8 +45,10 @@ export function activate(context: vscode.ExtensionContext) {
             // Try to get soldbPath from launch.json configurations first, then workspace settings
             let soldbPath = workspaceConfig.get<string>('soldbPath') || '';
             let pythonPath = workspaceConfig.get<string>('pythonPath') || 'python3';
-            let contractsPath = workspaceConfig.get<string>('contracts') || 'contracts.json';
+            let contractsPath = workspaceConfig.get<string>('contracts') || '';
+            let ethdebugDir = workspaceConfig.get<string>('ethdebugDir') || '';
             let from_addr = workspaceConfig.get<string>('from_addr') || "";
+            let contractAddress = workspaceConfig.get<string>('contractAddress') || "";
             
             // Check if there are any soldb debug configurations in launch.json
             const launchConfig = vscode.workspace.getConfiguration('launch');
@@ -57,7 +59,9 @@ export function activate(context: vscode.ExtensionContext) {
                 soldbPath = soldbConfig.soldbPath;
                 pythonPath = soldbConfig.pythonPath;
                 contractsPath = soldbConfig.contracts || contractsPath;
+                ethdebugDir = soldbConfig.ethdebugDir || ethdebugDir;
                 from_addr = soldbConfig.from_addr || "";
+                contractAddress = soldbConfig.contractAddress || "";
             }
             // If args were not provided via input box, try to get from launch.json or workspace settings
             if (args.length !== args_cnt) {
@@ -78,7 +82,9 @@ export function activate(context: vscode.ExtensionContext) {
                 functionArgs: args,
                 pythonPath: pythonPath,
                 contracts: contractsPath,
+                ethdebugDir: ethdebugDir,
                 from_addr: from_addr,
+                contractAddress: contractAddress,
                 source: vscode.window.activeTextEditor?.document.uri.fsPath || '',
                 workspaceRoot: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || ''
             };            
