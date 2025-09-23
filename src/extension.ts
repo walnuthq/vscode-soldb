@@ -49,6 +49,7 @@ export function activate(context: vscode.ExtensionContext) {
             let ethdebugDir = workspaceConfig.get<string>('ethdebugDir') || '';
             let from_addr = workspaceConfig.get<string>('from_addr') || "";
             let contractAddress = workspaceConfig.get<string>('contractAddress') || "";
+            let dapServerPath = workspaceConfig.get<string>('dapServerPath') || '';
             
             // Check if there are any soldb debug configurations in launch.json
             const launchConfig = vscode.workspace.getConfiguration('launch');
@@ -62,6 +63,7 @@ export function activate(context: vscode.ExtensionContext) {
                 ethdebugDir = soldbConfig.ethdebugDir || ethdebugDir;
                 from_addr = soldbConfig.from_addr || "";
                 contractAddress = soldbConfig.contractAddress || "";
+                dapServerPath = soldbConfig.dapServerPath || "";
             }
             // If args were not provided via input box, try to get from launch.json or workspace settings
             if (args.length !== args_cnt) {
@@ -78,6 +80,7 @@ export function activate(context: vscode.ExtensionContext) {
                 name: 'Debug Function',
                 request: 'launch',
                 soldbPath: soldbPath,
+                dapServerPath: dapServerPath,
                 function: functionName,
                 functionArgs: args,
                 pythonPath: pythonPath,
