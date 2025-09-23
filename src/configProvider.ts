@@ -4,7 +4,7 @@ export class SoldbDebugConfigurationProvider implements vscode.DebugConfiguratio
     provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): vscode.DebugConfiguration[] {
         return [
             {
-                name: 'Debug Solidity Function',
+                name: 'SolDB',
                 type: 'soldb',
                 request: 'launch',
                 pythonPath: 'python3',
@@ -15,8 +15,6 @@ export class SoldbDebugConfigurationProvider implements vscode.DebugConfiguratio
                 ethdebugDir: '',
                 from_addr: '',
                 contractAddress: '',
-                source: '${file}',
-                workspaceRoot: '${workspaceFolder}'
             }
         ];
     }
