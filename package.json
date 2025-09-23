@@ -70,6 +70,10 @@
               "from_addr": {
                 "type": "string",
                 "description": "From address for transaction simulation"
+              },
+              "dapServerPath": {
+                "type": "string",
+                "description": "Path to custom DAP server script"
               }
             }
           }
