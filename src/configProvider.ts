@@ -9,7 +9,6 @@ export class SoldbDebugConfigurationProvider implements vscode.DebugConfiguratio
                 request: 'launch',
                 pythonPath: 'python3',
                 soldbPath: '',
-                dapServerPath: '',
                 function: '',
                 functionArgs: [],
                 contracts: '',
@@ -35,7 +34,6 @@ export class SoldbDebugConfigurationProvider implements vscode.DebugConfiguratio
         const workspaceConfig = vscode.workspace.getConfiguration('soldb');
         config.pythonPath = config.pythonPath || workspaceConfig.get<string>('pythonPath') || 'python3';
         config.soldbPath = config.soldbPath || workspaceConfig.get<string>('soldbPath') || '';
-        config.dapServerPath = config.dapServerPath || workspaceConfig.get<string>('dapServerPath') || '';
         config.functionArgs = config.functionArgs || workspaceConfig.get<string[]>('functionArgs') || [];
         config.contracts = config.contracts || workspaceConfig.get<string>('contracts') || '';
         config.ethdebugDir = config.ethdebugDir || workspaceConfig.get<string>('ethdebugDir') || '';
