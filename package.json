@@ -1,7 +1,8 @@
 {
   "name": "wn",
+  "publisher": "walnut",
   "displayName": "Soldb Debugger",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -46,13 +47,9 @@
                 "description": "Function arguments",
                 "default": []
               },
-              "pythonPath": {
+              "soldbEnv": {
                 "type": "string",
-                "description": "Path to Python executable"
-              },
-              "soldbPath": {
-                "type": "string",
-                "description": "Path to soldb-cli directory"
+                "description": "Path to SolDB virtual environment"
               },
               "source": {
                 "type": "string",

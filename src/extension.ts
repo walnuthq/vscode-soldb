@@ -41,10 +41,8 @@ export function activate(context: vscode.ExtensionContext) {
 
             // Get configuration settings (same as debug adapter descriptor)
             const workspaceConfig = vscode.workspace.getConfiguration('soldb');
-            
-            // Try to get soldbPath from launch.json configurations first, then workspace settings
-            let soldbPath = workspaceConfig.get<string>('soldbPath') || '';
-            let pythonPath = workspaceConfig.get<string>('pythonPath') || 'python3';
+
+            let soldbEnv = workspaceConfig.get<string>('soldbEnv') || '';
             let contractsPath = workspaceConfig.get<string>('contracts') || '';
             let ethdebugDir = workspaceConfig.get<string>('ethdebugDir') || '';
             let from_addr = workspaceConfig.get<string>('from_addr') || "";
@@ -55,9 +53,8 @@ export function activate(context: vscode.ExtensionContext) {
             const configurations = launchConfig.get<any[]>('configurations') || [];
             const soldbConfig = configurations.find(config => config.type === 'soldb');
             
-            if (soldbConfig && soldbConfig.soldbPath) {
-                soldbPath = soldbConfig.soldbPath;
-                pythonPath = soldbConfig.pythonPath;
+            if (soldbConfig) {
+                soldbEnv = soldbConfig.soldbEnv || soldbEnv;
                 contractsPath = soldbConfig.contracts || contractsPath;
                 ethdebugDir = soldbConfig.ethdebugDir || ethdebugDir;
                 from_addr = soldbConfig.from_addr || "";
@@ -68,19 +65,14 @@ export function activate(context: vscode.ExtensionContext) {
                 args = soldbConfig.functionArgs || [];
             }
 
-            if (!soldbPath) {
-                vscode.window.showErrorMessage('soldb path not configured. Please set soldbPath in launch.json.');
-                return;
-            }
             // Start a debug session with the function name and args
             const debugConfig: vscode.DebugConfiguration = {
                 type: 'soldb',
-                name: 'Debug Function',
+                name: 'SolDB',
                 request: 'launch',
-                soldbPath: soldbPath,
                 function: functionName,
                 functionArgs: args,
-                pythonPath: pythonPath,
+                soldbEnv: soldbEnv,
                 contracts: contractsPath,
                 ethdebugDir: ethdebugDir,
                 from_addr: from_addr,

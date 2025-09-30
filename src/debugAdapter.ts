@@ -1,26 +1,27 @@
 import * as vscode from 'vscode';
-import * as path from 'path';
 
 export class SoldbDebugAdapterDescriptorFactory implements vscode.DebugAdapterDescriptorFactory {
     createDebugAdapterDescriptor(session: vscode.DebugSession): vscode.DebugAdapterDescriptor {
         // Get configuration settings (launch.json overrides workspace settings)
         const workspaceConfig = vscode.workspace.getConfiguration('soldb');
-        const pythonPath = session.configuration.pythonPath || workspaceConfig.get<string>('pythonPath') || 'python3';
-        const soldbPath = session.configuration.soldbPath || workspaceConfig.get<string>('soldbPath') || '';
-    
-        const dapPath = `${soldbPath}/tools/dap_server.py`;
-        // Build command arguments - launch dap_server.py as script
-        const env = {
-            ...process.env,
-            SOLDB_PATH: soldbPath,
-            PYTHONPATH: `${path.dirname(dapPath)}:${soldbPath}/src:${process.env.PYTHONPATH || ''}`
-        };
-
-
-        return new vscode.DebugAdapterExecutable(pythonPath, ['-m', 'dap_server'], {
-            env: env,
-            cwd: path.dirname(dapPath)
-        });
         
+        // Use the specific venv where soldb-dap-server is installed
+        const soldbEnv = session.configuration.soldbEnv || workspaceConfig.get<string>('soldbEnv') || '';
+        
+        // Validate that soldbEnv is set
+        if (!soldbEnv) {
+            throw new Error('soldbEnv must be configured. Please set soldbEnv in launch.json');
+        }
+
+        // Get the venv path from soldbEnv and construct the dap server executable path
+        const venvBinDir = `${soldbEnv}/bin`;
+        const dapServerPath = `${venvBinDir}/soldb-dap-server`;
+        
+        // Use the soldb-dap-server executable from the venv bin directory
+        return new vscode.DebugAdapterExecutable(dapServerPath, [], {
+            env: Object.fromEntries(
+                Object.entries(process.env).filter(([_, value]) => value !== undefined)
+            ) as { [key: string]: string }
+        });
     }
 }

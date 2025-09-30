@@ -7,8 +7,7 @@ export class SoldbDebugConfigurationProvider implements vscode.DebugConfiguratio
                 name: 'SolDB',
                 type: 'soldb',
                 request: 'launch',
-                pythonPath: 'python3',
-                soldbPath: '',
+                soldbEnv: '',
                 function: '',
                 functionArgs: [],
                 contracts: '',
@@ -30,8 +29,7 @@ export class SoldbDebugConfigurationProvider implements vscode.DebugConfiguratio
         
         // Allow launch.json to override workspace settings
         const workspaceConfig = vscode.workspace.getConfiguration('soldb');
-        config.pythonPath = config.pythonPath || workspaceConfig.get<string>('pythonPath') || 'python3';
-        config.soldbPath = config.soldbPath || workspaceConfig.get<string>('soldbPath') || '';
+        config.soldbEnv = config.soldbEnv || workspaceConfig.get<string>('soldbEnv') || '';
         config.functionArgs = config.functionArgs || workspaceConfig.get<string[]>('functionArgs') || [];
         config.contracts = config.contracts || workspaceConfig.get<string>('contracts') || '';
         config.ethdebugDir = config.ethdebugDir || workspaceConfig.get<string>('ethdebugDir') || '';
@@ -39,12 +37,6 @@ export class SoldbDebugConfigurationProvider implements vscode.DebugConfiguratio
         config.contractAddress = config.contractAddress || workspaceConfig.get<string>('contractAddress') || "";
         config.source = config.source || vscode.window.activeTextEditor?.document.uri.fsPath || '';
         config.workspaceRoot = config.workspaceRoot || folder?.uri.fsPath || '';
-
-        // Validate required configuration
-        if (!config.soldbPath) {
-            vscode.window.showErrorMessage('soldb path not configured. Please set soldb.soldbPath in settings or launch.json.');
-            return null;
-        }
 
         return config;
     }
