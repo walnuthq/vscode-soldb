@@ -1,0 +1,96 @@
+import * as vscode from 'vscode';
+import { SoldbDebugConfigurationProvider } from './configProvider';
+import { SoldbDebugAdapterDescriptorFactory } from './debugAdapter';
+import { SolidityCodeLensProvider } from './soliditySupport';
+
+export function activate(context: vscode.ExtensionContext) {
+
+    // Register the soldb debug configuration provider
+    context.subscriptions.push(
+        vscode.debug.registerDebugConfigurationProvider('soldb', new SoldbDebugConfigurationProvider())
+    );
+    
+    // Register the soldb debug adapter descriptor factory
+    context.subscriptions.push(
+        vscode.debug.registerDebugAdapterDescriptorFactory('soldb', new SoldbDebugAdapterDescriptorFactory())
+    );
+
+    // Register CodeLens provider for Solidity
+    context.subscriptions.push(
+        vscode.languages.registerCodeLensProvider({ language: 'solidity' }, new SolidityCodeLensProvider())
+    );
+
+    // Register the command that CodeLens will trigger
+    context.subscriptions.push(
+        vscode.commands.registerCommand('wn.runFunction', async (functionName: string, args_cnt: number) => {
+
+            let args: string[] = [];
+            if (args_cnt > 0) {
+                const argsInput = await vscode.window.showInputBox({
+                    prompt: `Enter arguments for ${functionName} (comma separated) or leave empty to use contracts.json`
+                });
+                args = argsInput ? argsInput.split(',').map(s => s.trim()) : [];
+                if (args.length === 0) {
+                    vscode.window.showInformationMessage(`No arguments provided for ${functionName}, using contracts.json instead.`);
+                }
+                else if (args.length !== args_cnt) {
+                    vscode.window.showErrorMessage(`Expected ${args_cnt} arguments, but got ${args.length}`);
+                    return;
+                }
+            }
+
+            // Get configuration settings (same as debug adapter descriptor)
+            const workspaceConfig = vscode.workspace.getConfiguration('soldb');
+
+            let soldbEnv = workspaceConfig.get<string>('soldbEnv') || '';
+            let contractsPath = workspaceConfig.get<string>('contracts') || '';
+            let ethdebugDir = workspaceConfig.get<string>('ethdebugDir') || '';
+            let from_addr = workspaceConfig.get<string>('from_addr') || "";
+            let contractAddress = workspaceConfig.get<string>('contractAddress') || "";
+            
+            // Check if there are any soldb debug configurations in launch.json
+            const launchConfig = vscode.workspace.getConfiguration('launch');
+            const configurations = launchConfig.get<any[]>('configurations') || [];
+            const soldbConfig = configurations.find(config => config.type === 'soldb');
+            
+            if (soldbConfig) {
+                soldbEnv = soldbConfig.soldbEnv || soldbEnv;
+                contractsPath = soldbConfig.contracts || contractsPath;
+                ethdebugDir = soldbConfig.ethdebugDir || ethdebugDir;
+                from_addr = soldbConfig.from_addr || "";
+                contractAddress = soldbConfig.contractAddress || "";
+            }
+            // If args were not provided via input box, try to get from launch.json or workspace settings
+            if (args.length !== args_cnt) {
+                args = soldbConfig.functionArgs || [];
+            }
+
+            // Start a debug session with the function name and args
+            const debugConfig: vscode.DebugConfiguration = {
+                type: 'soldb',
+                name: 'SolDB',
+                request: 'launch',
+                function: functionName,
+                functionArgs: args,
+                soldbEnv: soldbEnv,
+                contracts: contractsPath,
+                ethdebugDir: ethdebugDir,
+                from_addr: from_addr,
+                contractAddress: contractAddress,
+                source: vscode.window.activeTextEditor?.document.uri.fsPath || '',
+                workspaceRoot: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || ''
+            };            
+            // Get the workspace folder for the debug session
+            const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+            
+            try {
+                const success = await vscode.debug.startDebugging(workspaceFolder, debugConfig);
+            } catch (error) {
+                vscode.window.showErrorMessage(`Failed to start debugging: ${error}`);
+            }
+        })
+    );
+}
+
+export function deactivate() {}
+
