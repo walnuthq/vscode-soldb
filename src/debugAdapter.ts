@@ -3,6 +3,11 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import * as path from "path";
 import * as fs from "fs";
+import {
+  isLocalhostRpc,
+  checkRpcAvailability,
+  showAnvilNotRunningWarning,
+} from "./rpcUtils";
 
 const execAsync = promisify(exec);
 
@@ -22,9 +27,19 @@ export class SoldbDebugAdapterDescriptorFactory
       }
 
       const workspaceRoot = workspaceFolder.uri.fsPath;
-      vscode.window.showInformationMessage(
-        `Setting up debug adapter for: ${workspaceRoot}`
-      );
+
+      // Get RPC URL from session configuration
+      const config = session.configuration;
+      const rpcUrl = config?.rpc || "http://localhost:8545";
+
+      // Check if Anvil/RPC is running (only for localhost RPCs)
+      const isLocalhost = isLocalhostRpc(rpcUrl);
+      if (isLocalhost) {
+        const isRunning = await checkRpcAvailability(rpcUrl);
+        if (!isRunning) {
+          await showAnvilNotRunningWarning(rpcUrl);
+        }
+      }
 
       // Check for soldb --version
       try {
@@ -75,13 +90,10 @@ export class SoldbDebugAdapterDescriptorFactory
     try {
       const { stdout } = await execAsync("which soldb-dap-server");
       const dapServerPath = stdout.trim();
-      vscode.window.showInformationMessage(
-        `Successfully found soldb-dap-server in ${dapServerPath}`
-      );
       return dapServerPath;
     } catch {
       vscode.window.showWarningMessage(
-        `soldb-dap-server not found in PATH. Please ensure soldb-dap-server is properly installed.`
+        `soldb not found in PATH. Please ensure soldb is properly installed.`
       );
     }
 

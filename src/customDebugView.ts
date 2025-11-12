@@ -7,6 +7,7 @@ interface MonitoredTransaction {
   blockNumber?: number;
   from?: string;
   value?: string;
+  status?: number; // 1 = success, 0 = failed/reverted, undefined = unknown
 }
 
 export class CustomDebugViewProvider
@@ -21,10 +22,22 @@ export class CustomDebugViewProvider
 
   private items: DebugViewItem[] = [];
   private transactions: MonitoredTransaction[] = [];
+  private rpcUrl: string = "";
 
   constructor() {
     // Initial refresh
     this.refresh();
+
+    // Listen for debug session start to capture RPC URL
+    vscode.debug.onDidStartDebugSession((session) => {
+      if (session.type === "soldb") {
+        const config = session.configuration;
+        if (config?.rpc) {
+          this.rpcUrl = config.rpc;
+          this.refresh();
+        }
+      }
+    });
   }
 
   refresh(): void {
@@ -45,9 +58,20 @@ export class CustomDebugViewProvider
         if (response && response.transactions) {
           this.transactions = response.transactions as MonitoredTransaction[];
         }
+        // Get RPC URL from response or session configuration
+        if (response && response.rpcUrl) {
+          this.rpcUrl = response.rpcUrl;
+        } else {
+          // Fallback to session configuration
+          const config = session.configuration;
+          this.rpcUrl = config?.rpc || "unknown";
+        }
       } catch (error) {
         // If request fails, use empty list
         this.transactions = [];
+        // Try to get RPC from session configuration
+        const config = session.configuration;
+        this.rpcUrl = config?.rpc || "unknown";
       }
 
       // Build items list
@@ -55,9 +79,13 @@ export class CustomDebugViewProvider
 
       // Add monitored transactions
       if (this.transactions.length > 0) {
+        const rpcLabel =
+          this.rpcUrl && this.rpcUrl !== "unknown"
+            ? `RPC (${this.rpcUrl})`
+            : "RPC (unknown)";
         this.items.push(
           new DebugViewItem(
-            "Monitored Transactions", //TODO - Monitored Transactions at RPC(name)
+            `Monitored Transactions at ${rpcLabel}`,
             `${this.transactions.length} transaction(s)`,
             "list"
           )
@@ -69,10 +97,15 @@ export class CustomDebugViewProvider
             txHash.length > 16 ? `${txHash.substring(0, 16)}...` : txHash;
           const description = tx.entrypoint ? `${tx.entrypoint}` : "";
 
+          // Check if transaction failed (status === 0)
+          const isFailed = tx.status !== undefined && tx.status === 0;
+          // Use "error" icon for failed transactions, "symbol-event" for successful ones
+          const icon = isFailed ? "error" : "symbol-event";
+
           const item = new DebugViewItem(
             shortHash,
             description,
-            "symbol-event",
+            icon,
             "transaction" // Context value for menu
           );
           item.command = {
@@ -83,11 +116,54 @@ export class CustomDebugViewProvider
           this.items.push(item);
         }
       } else {
-        this.items.push(new DebugViewItem("No transactions", "", undefined)); //TODO - Connected to RPC(name) no transactions
+        const rpcLabel =
+          this.rpcUrl && this.rpcUrl !== "unknown"
+            ? `RPC (${this.rpcUrl})`
+            : "RPC (unknown)";
+        const item = new DebugViewItem(
+          `Connected to ${rpcLabel}`,
+          "\nNo transactions", // Try with newline in description
+          undefined
+        );
+        this.items.push(item);
       }
     } else {
+      // No active session - try to get RPC from configuration
+      let rpcUrl: string | undefined = undefined;
+      try {
+        // Try to get from workspace settings
+        const workspaceConfig = vscode.workspace.getConfiguration("soldb");
+        rpcUrl = workspaceConfig.get<string>("rpc");
+
+        // If not found, try to get from launch.json configurations
+        if (!rpcUrl) {
+          const launchConfig = vscode.workspace.getConfiguration("launch");
+          const configurations =
+            launchConfig.get<any[]>("configurations") || [];
+          const soldbConfig = configurations.find(
+            (config) => config.type === "soldb"
+          );
+          if (soldbConfig && soldbConfig.rpc) {
+            rpcUrl = soldbConfig.rpc;
+          }
+        }
+      } catch (error) {
+        // If error, rpcUrl remains undefined
+      }
+
+      // Use default Anvil RPC if not found
+      const defaultRpc = "http://localhost:8545";
+      const rpcUrlToDisplay = rpcUrl || defaultRpc;
+      const rpcLabel = rpcUrl
+        ? `RPC (${rpcUrl})`
+        : `RPC (${defaultRpc}) [default Anvil]`;
+
       this.items = [
-        new DebugViewItem("No active debug session", "", undefined), //TODO - Add rpc info here
+        new DebugViewItem(
+          `No active debug session at ${rpcLabel}`,
+          "",
+          undefined
+        ),
       ];
     }
   }

@@ -51,18 +51,7 @@ export function activate(context: vscode.ExtensionContext) {
           };
           // Refresh custom debug view
           customDebugViewProvider.refresh();
-          vscode.window
-            .showInformationMessage(
-              `Transaction: ${txData.txHash?.substring(0, 16)}... | ` +
-                `Contract: ${txData.contractAddress?.substring(0, 10)}... | ` +
-                `Entrypoint: ${txData.entrypoint || "unknown"}`,
-              "Open in Debug View"
-            )
-            .then((selection) => {
-              if (selection === "Open in Debug View") {
-                vscode.commands.executeCommand("workbench.view.debug");
-              }
-            });
+          // Transaction monitored - just refresh view, no popup needed
         }
       }
     })
@@ -72,9 +61,6 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.debug.onDidStartDebugSession((session) => {
       if (session.type === "soldb") {
-        vscode.window.showInformationMessage(
-          `Debug session started: ${session.name}`
-        );
         // Ensure breakpoints are enabled everywhere
         const config = vscode.workspace.getConfiguration("debug");
         config.update(
@@ -91,9 +77,6 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.debug.onDidTerminateDebugSession((session) => {
       if (session.type === "soldb") {
-        vscode.window.showInformationMessage(
-          `Debug session terminated: ${session.name}`
-        );
         // Refresh custom debug view when debug session ends
         customDebugViewProvider.refresh();
       }
@@ -163,9 +146,6 @@ export function activate(context: vscode.ExtensionContext) {
         if (breakpoints.length > 0) {
           // Remove breakpoint
           vscode.debug.removeBreakpoints(breakpoints);
-          vscode.window.showInformationMessage(
-            `Breakpoint removed at line ${line + 1}`
-          );
         } else {
           // Add breakpoint - VS Code will automatically send setBreakpoints request to debug adapter
           const breakpoint = new vscode.SourceBreakpoint(
@@ -175,9 +155,6 @@ export function activate(context: vscode.ExtensionContext) {
             )
           );
           vscode.debug.addBreakpoints([breakpoint]);
-          vscode.window.showInformationMessage(
-            `Breakpoint set at line ${line + 1}`
-          );
         }
       } catch (error: any) {
         vscode.window.showErrorMessage(
@@ -229,12 +206,6 @@ export function activate(context: vscode.ExtensionContext) {
           );
 
           if (response) {
-            vscode.window.showInformationMessage(
-              `Transaction ready for debugging: ${response.txHash?.substring(
-                0,
-                16
-              )}...`
-            );
             // Refresh the view to show updated state
             customDebugViewProvider.refresh();
           }
@@ -260,11 +231,7 @@ export function activate(context: vscode.ExtensionContext) {
             prompt: `Enter arguments for ${functionName} (comma separated) or leave empty to use contracts.json`,
           });
           args = argsInput ? argsInput.split(",").map((s) => s.trim()) : [];
-          if (args.length === 0) {
-            vscode.window.showInformationMessage(
-              `No arguments provided for ${functionName}, using contracts.json instead.`
-            );
-          } else if (args.length !== args_cnt) {
+          if (args.length !== 0 && args.length !== args_cnt) {
             vscode.window.showErrorMessage(
               `Expected ${args_cnt} arguments, but got ${args.length}`
             );
