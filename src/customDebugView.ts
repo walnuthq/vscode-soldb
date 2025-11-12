@@ -57,7 +57,7 @@ export class CustomDebugViewProvider
       if (this.transactions.length > 0) {
         this.items.push(
           new DebugViewItem(
-            "Monitored Transactions",
+            "Monitored Transactions", //TODO - Monitored Transactions at RPC(name)
             `${this.transactions.length} transaction(s)`,
             "list"
           )
@@ -83,13 +83,11 @@ export class CustomDebugViewProvider
           this.items.push(item);
         }
       } else {
-        this.items.push(
-          new DebugViewItem("No transactions monitored yet", "", undefined)
-        );
+        this.items.push(new DebugViewItem("No transactions", "", undefined)); //TODO - Connected to RPC(name) no transactions
       }
     } else {
       this.items = [
-        new DebugViewItem("No active debug session", "", undefined),
+        new DebugViewItem("No active debug session", "", undefined), //TODO - Add rpc info here
       ];
     }
   }

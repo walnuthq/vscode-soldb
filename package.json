@@ -83,7 +83,7 @@
       "debug": [
         {
           "id": "soldb.customDebugView",
-          "name": "Soldb Debug Info",
+          "name": "Transactions",
           "when": "true"
         }
       ]
