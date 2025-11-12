@@ -2,7 +2,7 @@
   "name": "wn",
   "publisher": "walnut",
   "displayName": "Soldb Debugger",
-  "version": "0.0.5-rc.7",
+  "version": "0.0.1-rc.1",
   "engines": {
     "vscode": "^1.85.0"
   },
