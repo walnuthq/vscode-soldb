@@ -93,17 +93,14 @@ export class CustomDebugViewProvider
 
         for (const tx of this.transactions) {
           const txHash = tx.txHash || "unknown";
-          const shortHash =
-            txHash.length > 16 ? `${txHash.substring(0, 16)}...` : txHash;
           const description = tx.entrypoint ? `${tx.entrypoint}` : "";
-
           // Check if transaction failed (status === 0)
           const isFailed = tx.status !== undefined && tx.status === 0;
           // Use "error" icon for failed transactions, "symbol-event" for successful ones
           const icon = isFailed ? "error" : "symbol-event";
 
           const item = new DebugViewItem(
-            shortHash,
+            txHash,
             description,
             icon,
             "transaction" // Context value for menu
