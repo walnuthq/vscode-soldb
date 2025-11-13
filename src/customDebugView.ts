@@ -80,12 +80,10 @@ export class CustomDebugViewProvider
       // Add monitored transactions
       if (this.transactions.length > 0) {
         const rpcLabel =
-          this.rpcUrl && this.rpcUrl !== "unknown"
-            ? `RPC (${this.rpcUrl})`
-            : "RPC (unknown)";
+          this.rpcUrl && this.rpcUrl !== "unknown" ? this.rpcUrl : "unknown";
         this.items.push(
           new DebugViewItem(
-            `Monitored Transactions at ${rpcLabel}`,
+            `Monitoring transactions at ${rpcLabel}`,
             `${this.transactions.length} transaction(s)`,
             "list"
           )
@@ -96,8 +94,8 @@ export class CustomDebugViewProvider
           const description = tx.entrypoint ? `${tx.entrypoint}` : "";
           // Check if transaction failed (status === 0)
           const isFailed = tx.status !== undefined && tx.status === 0;
-          // Use "error" icon for failed transactions, "symbol-event" for successful ones
-          const icon = isFailed ? "error" : "symbol-event";
+          // Use "error" icon for failed transactions, "check" for successful ones
+          const icon = isFailed ? "error" : "check";
 
           const item = new DebugViewItem(
             txHash,
