@@ -150,8 +150,8 @@ export class CustomDebugViewProvider
       const defaultRpc = "http://localhost:8545";
       const rpcUrlToDisplay = rpcUrl || defaultRpc;
       const rpcLabel = rpcUrl
-        ? `RPC (${rpcUrl})`
-        : `RPC (${defaultRpc}) [default Anvil]`;
+        ? `RPC : ${rpcUrl}`
+        : `RPC : ${defaultRpc} [default Anvil]`;
 
       this.items = [
         new DebugViewItem(
