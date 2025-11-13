@@ -1,5 +1,15 @@
 import * as vscode from "vscode";
 
+function shortenHash(hash: string): string {
+  if (!hash || hash === "unknown" || hash.length < 10) {
+    return hash;
+  }
+  if (hash.startsWith("0x")) {
+    return `${hash.slice(0, 8)}...${hash.slice(-6)}`;
+  }
+  return `${hash.slice(0, 6)}...${hash.slice(-6)}`;
+}
+
 interface MonitoredTransaction {
   txHash: string;
   contractAddress?: string;
@@ -91,6 +101,7 @@ export class CustomDebugViewProvider
 
         for (const tx of this.transactions) {
           const txHash = tx.txHash || "unknown";
+          const shortenedHash = shortenHash(txHash);
           const description = tx.entrypoint ? `${tx.entrypoint}` : "";
           // Check if transaction failed (status === 0)
           const isFailed = tx.status !== undefined && tx.status === 0;
@@ -98,10 +109,11 @@ export class CustomDebugViewProvider
           const icon = isFailed ? "error" : "check";
 
           const item = new DebugViewItem(
-            txHash,
+            shortenedHash,
             description,
             icon,
-            "transaction" // Context value for menu
+            "transaction", // Context value for menu
+            txHash // Full hash for tooltip
           );
           item.command = {
             command: "soldb.debugTransaction",
@@ -182,10 +194,18 @@ class DebugViewItem extends vscode.TreeItem {
     public readonly label: string,
     public readonly description: string,
     public readonly iconPath?: string | vscode.ThemeIcon,
-    public readonly contextValue?: string
+    public readonly contextValue?: string,
+    public readonly fullHash?: string
   ) {
     super(label, vscode.TreeItemCollapsibleState.None);
-    this.tooltip = `${this.label} - ${this.description}`;
+    // Show full hash in tooltip if available
+    if (fullHash) {
+      this.tooltip = fullHash;
+    } else {
+      this.tooltip = description
+        ? `${this.label} - ${this.description}`
+        : this.label;
+    }
     this.description = description;
     this.contextValue = contextValue;
 
