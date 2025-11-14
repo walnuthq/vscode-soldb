@@ -10,6 +10,8 @@ Before using the extension, make sure you have:
 
 1. **soldb** installed and available in your PATH
 
+   Install soldb: [Quick Start Guide](https://github.com/walnuthq/soldb?tab=readme-ov-file#quick-start)
+
    ```bash
    # Check if installed
    soldb --version

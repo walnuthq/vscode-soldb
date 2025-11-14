@@ -3,6 +3,7 @@
   "publisher": "walnut",
   "displayName": "Soldb Debugger",
   "version": "0.0.1-rc.1",
+  "icon": "assets/walnut_logo-PNG-blue_bg_icon.png",
   "engines": {
     "vscode": "^1.85.0"
   },
