@@ -3,6 +3,7 @@
   "publisher": "walnut",
   "displayName": "Soldb Debugger",
   "version": "0.0.1-rc.1",
+  "icon": "assets/walnut_logo-PNG-blue_bg_icon.png",
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -24,12 +25,44 @@
             "properties": {
               "rpc": {
                 "type": "string",
-                "description": "RPC URL",
+                "description": "RPC URL for connecting to the blockchain",
                 "default": "http://localhost:8545"
               },
               "block": {
                 "type": "string",
-                "description": "Block number or 'latest'"
+                "description": "Block number or 'latest'. Used when debugging specific transactions."
+              },
+              "function": {
+                "type": "string",
+                "description": "Function signature, e.g., 'processOrder(uint256,string,string)'. When provided with functionArgs, enables simulation mode."
+              },
+              "functionArgs": {
+                "type": "array",
+                "description": "Array of function arguments as strings, e.g., ['100', 'physical', 'express']."
+              },
+              "contractAddress": {
+                "type": "string",
+                "description": "Contract address (0x...). Required for simulation mode."
+              },
+              "from_addr": {
+                "type": "string",
+                "description": "Sender address (0x...). Default sender will be used if not specified."
+              },
+              "contracts": {
+                "type": "string",
+                "description": "Path to contracts.json file for multi-contract debugging. The extension will auto-detect out/contracts.json if this is not specified."
+              },
+              "ethdebugDir": {
+                "type": "string",
+                "description": "Path to ethdebug directory for single contract debugging. Can be a path or 'address:name:path' format."
+              },
+              "source": {
+                "type": "string",
+                "description": "Source file path. Auto-detected from the active editor if not specified."
+              },
+              "workspaceRoot": {
+                "type": "string",
+                "description": "Workspace root directory. Auto-detected from the workspace folder if not specified."
               }
             }
           }
